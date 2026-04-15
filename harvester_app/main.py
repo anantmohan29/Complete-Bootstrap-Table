@@ -95,7 +95,10 @@ def run_harvester(binary_path: str, domain: str, source: str, output_base: Path)
     )
 
     txt_file = output_base.with_suffix(".txt")
-    txt_file.write_text("\n".join(filter(None, [process.stdout, process.stderr])), encoding="utf-8")
+    report_parts = ["=== STDOUT ===", process.stdout.strip()]
+    if process.stderr.strip():
+        report_parts.extend(["", "=== STDERR ===", process.stderr.strip()])
+    txt_file.write_text("\n".join(report_parts) + "\n", encoding="utf-8")
 
     if process.returncode != 0:
         raise RuntimeError(
@@ -120,9 +123,21 @@ def main() -> int:
         run_harvester(binary, args.domain, args.source, output_base)
 
         print("✔ Scan completed")
-        print(f"✔ Results saved to: {output_base.with_suffix('.html')}")
-        print(f"✔ Results saved to: {output_base.with_suffix('.xml')}")
-        print(f"✔ Results saved to: {output_base.with_suffix('.txt')}")
+        html_file = output_base.with_suffix(".html")
+        xml_file = output_base.with_suffix(".xml")
+        txt_file = output_base.with_suffix(".txt")
+
+        if html_file.exists():
+            print(f"✔ Results saved to: {html_file}")
+        else:
+            print(f"⚠ Expected HTML output not found: {html_file}")
+
+        if xml_file.exists():
+            print(f"✔ Results saved to: {xml_file}")
+        else:
+            print(f"⚠ Expected XML output not found: {xml_file}")
+
+        print(f"✔ Results saved to: {txt_file}")
         return 0
     except KeyboardInterrupt:
         print("Interrupted by user.", file=sys.stderr)
