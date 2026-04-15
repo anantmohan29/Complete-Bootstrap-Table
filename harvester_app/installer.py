@@ -11,6 +11,7 @@ from typing import Optional
 
 
 HARVESTER_CANDIDATES = ("theHarvester", "theharvester")
+INSTALL_COMMAND_TIMEOUT_SECONDS = 300
 
 
 class InstallationError(RuntimeError):
@@ -27,15 +28,24 @@ def detect_harvester_binary() -> Optional[str]:
 
 
 def _run_install_command(command: list[str]) -> None:
-    process = subprocess.run(
-        command,
-        check=False,
-        capture_output=True,
-        text=True,
-        env=os.environ.copy(),
-    )
+    try:
+        process = subprocess.run(
+            command,
+            check=False,
+            capture_output=True,
+            text=True,
+            env=os.environ.copy(),
+            timeout=INSTALL_COMMAND_TIMEOUT_SECONDS,
+        )
+    except subprocess.TimeoutExpired as exc:
+        raise InstallationError(
+            f"Installation command timed out after {INSTALL_COMMAND_TIMEOUT_SECONDS} seconds: {' '.join(command)}"
+        ) from exc
+
     if process.returncode != 0:
-        detail = process.stderr.strip() or process.stdout.strip() or "unknown installation error"
+        detail = process.stderr.strip() or process.stdout.strip()
+        if not detail:
+            detail = f"Command failed with exit code {process.returncode}: {' '.join(command)}"
         raise InstallationError(detail)
 
 

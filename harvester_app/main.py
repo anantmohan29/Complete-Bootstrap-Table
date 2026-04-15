@@ -15,6 +15,7 @@ DOMAIN_PATTERN = re.compile(
     r"^(?=.{1,253}$)(?:[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?\.)+[A-Za-z]{2,63}$"
 )
 OUTPUT_NAME_PATTERN = re.compile(r"^[A-Za-z0-9_.-]{1,100}$")
+HARVESTER_TIMEOUT_SECONDS = 600
 
 
 def valid_domain(value: str) -> str:
@@ -37,7 +38,7 @@ def valid_source(value: str) -> str:
 
 def valid_output_name(value: str) -> str:
     output = value.strip()
-    if "/" in output or "\\" in output or not OUTPUT_NAME_PATTERN.fullmatch(output):
+    if Path(output).name != output or output in {".", ".."} or not OUTPUT_NAME_PATTERN.fullmatch(output):
         raise argparse.ArgumentTypeError(
             "Output filename must be 1-100 chars and contain only letters, numbers, underscore, dash, or dot."
         )
@@ -87,12 +88,18 @@ def run_harvester(binary_path: str, domain: str, source: str, output_base: Path)
     ]
 
     print("[+] Executing theHarvester...")
-    process = subprocess.run(
-        command,
-        check=False,
-        capture_output=True,
-        text=True,
-    )
+    try:
+        process = subprocess.run(
+            command,
+            check=False,
+            capture_output=True,
+            text=True,
+            timeout=HARVESTER_TIMEOUT_SECONDS,
+        )
+    except subprocess.TimeoutExpired as exc:
+        raise RuntimeError(
+            f"theHarvester execution timed out after {HARVESTER_TIMEOUT_SECONDS} seconds."
+        ) from exc
 
     txt_file = output_base.with_suffix(".txt")
     report_parts = ["=== STDOUT ===", process.stdout.strip()]
