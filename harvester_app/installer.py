@@ -52,11 +52,14 @@ def ensure_harvester_installed(auto_install: bool = True) -> str:
     if not apt_get:
         raise InstallationError("apt-get not found. Install theHarvester manually.")
 
-    if not hasattr(os, "geteuid"):
+    if not sys.platform.startswith("linux"):
         raise InstallationError(
             "Automatic installation is supported only on Linux systems. "
             "Please install theHarvester manually for your operating system."
         )
+
+    if not hasattr(os, "geteuid"):
+        raise InstallationError("Could not determine effective user privileges on this system.")
 
     install_commands = []
     if os.geteuid() != 0:

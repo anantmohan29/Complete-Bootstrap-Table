@@ -50,7 +50,7 @@ harvester_app/
 From the repository root:
 
 ```bash
-cd /home/runner/work/Complete-Bootstrap-Table/Complete-Bootstrap-Table/harvester_app
+cd harvester_app
 chmod +x install.sh
 ./install.sh
 ```
@@ -102,7 +102,7 @@ python3 main.py --domain example.com --source all --output result --no-install
 
 ## 7) Run in VS Code
 
-1. Open folder: `/home/runner/work/Complete-Bootstrap-Table/Complete-Bootstrap-Table/harvester_app`
+1. Open folder: `harvester_app` in VS Code.
 2. Open terminal in VS Code.
 3. Run setup:
    ```bash
