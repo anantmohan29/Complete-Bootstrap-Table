@@ -115,4 +115,4 @@ if __name__ == "__main__":
         print(f"theHarvester available at: {binary}")
     except Exception as exc:  # pragma: no cover
         print(f"Error: {exc}", file=sys.stderr)
-        raise SystemExit(1)
+        sys.exit(1)

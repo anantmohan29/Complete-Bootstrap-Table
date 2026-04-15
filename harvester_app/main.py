@@ -147,7 +147,7 @@ def main() -> int:
         print(f"✔ Results saved to: {txt_file}")
         return 0
     except KeyboardInterrupt:
-        print("Interrupted by user.", file=sys.stderr)
+        print("[!] Interrupted by user.", file=sys.stderr)
     except (InstallationError, PermissionError, argparse.ArgumentTypeError, RuntimeError, ValueError) as exc:
         print(f"Error: {exc}", file=sys.stderr)
     except Exception as exc:  # pragma: no cover
