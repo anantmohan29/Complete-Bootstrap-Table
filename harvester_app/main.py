@@ -8,10 +8,12 @@ import subprocess
 import sys
 from pathlib import Path
 
-from config import OUTPUT_DIR, SUPPORTED_SOURCES
+from config import OUTPUT_DIR, SOURCE_ALIASES, SUPPORTED_SOURCES
 from installer import InstallationError, ensure_harvester_installed, validate_write_permissions
 
-DOMAIN_PATTERN = re.compile(r"^(?=.{1,253}$)(?!-)(?:[A-Za-z0-9-]{1,63}\.)+[A-Za-z]{2,63}$")
+DOMAIN_PATTERN = re.compile(
+    r"^(?=.{1,253}$)(?:[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?\.)+[A-Za-z]{2,63}$"
+)
 OUTPUT_NAME_PATTERN = re.compile(r"^[A-Za-z0-9_.-]{1,100}$")
 
 
@@ -25,12 +27,12 @@ def valid_domain(value: str) -> str:
 
 
 def valid_source(value: str) -> str:
-    source = value.strip()
+    source = value.strip().lower()
     if source not in SUPPORTED_SOURCES:
         raise argparse.ArgumentTypeError(
             f"Invalid source '{source}'. Choose one of: {', '.join(sorted(SUPPORTED_SOURCES))}"
         )
-    return source
+    return SOURCE_ALIASES.get(source, source)
 
 
 def valid_output_name(value: str) -> str:
@@ -93,7 +95,7 @@ def run_harvester(binary_path: str, domain: str, source: str, output_base: Path)
     )
 
     txt_file = output_base.with_suffix(".txt")
-    txt_file.write_text(process.stdout + ("\n" + process.stderr if process.stderr else ""), encoding="utf-8")
+    txt_file.write_text("\n".join(filter(None, [process.stdout, process.stderr])), encoding="utf-8")
 
     if process.returncode != 0:
         raise RuntimeError(

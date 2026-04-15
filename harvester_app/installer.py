@@ -52,6 +52,9 @@ def ensure_harvester_installed(auto_install: bool = True) -> str:
     if not apt_get:
         raise InstallationError("apt-get not found. Install theHarvester manually.")
 
+    if not hasattr(os, "geteuid"):
+        raise InstallationError("Automatic installation is supported only on Linux systems.")
+
     install_commands = []
     if os.geteuid() != 0:
         sudo = shutil.which("sudo")

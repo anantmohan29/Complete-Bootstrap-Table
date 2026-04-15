@@ -29,7 +29,7 @@ SUPPORTED_SOURCES = {
     "netlas",
     "otx",
     "rapiddns",
-    "securityTrails",
+    "securitytrails",
     "sitedossier",
     "subdomaincenter",
     "subdomainfinderc99",
@@ -38,4 +38,9 @@ SUPPORTED_SOURCES = {
     "virustotal",
     "yahoo",
     "zoomeye",
+}
+
+
+SOURCE_ALIASES = {
+    "securitytrails": "securityTrails",
 }
